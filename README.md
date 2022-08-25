@@ -1,2 +1,3 @@
 # labyrinthian
-Labyrinthian is a rogue-like dungeon crawler. It was initially made as the final project for CS61BL Su22.
+Labyrinthian is a rogue-like dungeon crawler. 
+I initially wrote this for the final project for Berkeley's CS61BL Su22, together with Diane Au.
