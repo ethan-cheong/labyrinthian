@@ -8,7 +8,9 @@ import java.util.Random;
 import static byow.TileEngine.Tileset.*;
 
 /**
- * Class that generates a world randomly.
+ * Class that randomly generates a 2d world, for use in the Labyrinthian game.
+ * This class contains the generateWorld method, which is called by the Engine.
+ * It also contains helper methods for world generation.
  */
 public class WorldGenerator {
     int _height;
@@ -27,6 +29,13 @@ public class WorldGenerator {
     double P_CREATE_ROOM = 0.01;
     Difficulty _difficulty;
 
+    /**
+     * Constructor for a WorldGenerator.
+     * @param width the width of the world to be generated
+     * @param height the height of the world to be generated
+     * @param seed a seed to pass to Random, allowing for pseudo-random world generation
+     * @param difficulty a difficulty parameter which determines features of the world.
+     */
     public WorldGenerator(int width, int height, Long seed, Difficulty difficulty) {
         _height = height;
         _width = width;
@@ -34,13 +43,21 @@ public class WorldGenerator {
         _difficulty = difficulty;
     }
 
+    /**
+     * Call generateWorld to produce a 2D world array that fits the project spec to pass to the
+     * BYOW
+     * engine.
+     * It does this by calling helper functions to generate rooms, turn the rooms into a graph
+     * representation, calling Prim's Algorithm to get a Minimum Spanning Tree, randomly adding
+     * edges, turning this into an int[][] representation, and then converting this to a TETile[][]
+     * object. Finally, the player character, enemies and exit are added.
+     * @return TETile[][] world
+     */
     public TETile[][] generateWorld() {
-        // TODO: add in item, terrain generation
         List<Room> roomList = generateRooms();
         RoomGraph roomGraph = new RoomGraph(roomList, _random);
         roomGraph.pa(); // should convert roomGraph into an MST in-place;
-        roomGraph.addRandomEdges(2); // Try adding at least two edges in the graph so we get cycles
-        // Node that worldRep is rendered upside-down
+        roomGraph.addRandomEdges(2); // Try adding at least two edges in the graph, so we get cycles
         int[][] worldRep = generateHallways(roomGraph);
         TETile[][] world = convertToTiles(worldRep);
         addPlayer(world);
@@ -50,11 +67,10 @@ public class WorldGenerator {
     }
 
     /**
-     * Adds the player into the world.
-     * @return
+     * Adds the player into the world by initializing them in the bottom-left available floor tile.
+     * This function modifies the TETile array in-place.
      */
     private void addPlayer(TETile[][] world) {
-        // Just initialize at the top left corner for now lol
         for (int i=0; i<_height; i++) {
             for (int j=0; j<_width; j++) {
                 if (world[j][i].equals(FLOOR)) {
@@ -66,8 +82,8 @@ public class WorldGenerator {
     }
 
     /**
-     * Adds the exit into the world. (I'll take this out eventually, not a very interesting win
-     * condition)
+     * Adds the exit into the world in the top-right first available floor tile.
+     * This function modifies the TETile array in-place.
      */
 
     private void addExit(TETile[][] world) {
@@ -106,9 +122,9 @@ public class WorldGenerator {
     }
 
     /**
-     * Return a roomList containing randomly generated rooms.
-     *
-     * @return roomList
+     * Return a List of Room objects, each of which is a randomly generated rooms.
+     * This recursively calls generateRoomsHelper until no more suitable rooms can be created.
+     * @return roomList the generated list of rooms.
      */
     private List<Room> generateRooms() {
         List<Room> result = new ArrayList<>();
@@ -129,28 +145,21 @@ public class WorldGenerator {
         // Base case: if parent is too small, do nothing; rooms can't fit inside.
         if (parentHeight < MIN_ROOM_DIM + 2 || parentWidth < MIN_ROOM_DIM + 2) {
             return;
-        } else if ((parentHeight >= MIN_ROOM_DIM + 2 && parentHeight < MAX_ROOM_DIM + 2) &&
+        }
+        if ((parentHeight >= MIN_ROOM_DIM + 2 && parentHeight < MAX_ROOM_DIM + 2) &&
                 (parentWidth >= MIN_ROOM_DIM + 2 && parentWidth < MAX_ROOM_DIM + 2)) {
             // If width and height are in good range, we can make a room.
             boolean createRoom = RandomUtils.bernoulli(_random, P_CREATE_ROOM);
             if (createRoom) {
-                // create a room. [3,6) -> [3,5]
-
                 int roomHeight = RandomUtils.uniform(_random, MIN_ROOM_DIM, parentHeight-1);
                 int roomWidth = RandomUtils.uniform(_random, MIN_ROOM_DIM, parentWidth-1);
                 int roomX = RandomUtils.uniform(_random, parentX, parentWidth-2-roomWidth+parentX+1);
                 int roomY = RandomUtils.uniform(_random, parentY, parentHeight-2-roomHeight+parentY+1);
                 roomList.add(new Room(roomHeight, roomWidth, roomX, roomY));
-            } else {
-                // do nothing for now.
-                // TODO: try recursing further if too sparse
             }
         } else {
             if (parentHeight >= MAX_ROOM_DIM + 2) {
                 // if too tall, do a horizontal split.
-                //TODO: maybe change this topHeight randomization if boxes are too thin
-                // pick split height
-
                 double splitRatio = RandomUtils.uniform(_random, 0.5, 0.7);
                 int topHeight = ((Double) (parentHeight * splitRatio)).intValue();
                 int bottomHeight = parentHeight - topHeight;
@@ -203,25 +212,22 @@ public class WorldGenerator {
 
                     if (Math.abs(startCoords[0] - endCoords[0]) <= endRoom.getWidth() / 2) {
                         // carve out vertical corridor from start to end.
-                        // Just for debugging
-                        // System.out.println("Carving vertical corridor from "+i+" to "+ j);
                         worldRep = emptyOutCellsVertical(
                                 worldRep, startCoords[0], startCoords[1], endCoords[1]
                         );
                     } else if ((Math.abs(startCoords[1] - endCoords[1])
                             <= endRoom.getHeight() / 2)) {
                         // Carve out horizontal corridor from start to end.
-                        // System.out.println("Carving horizontal corridor from "+i+" to "+ j);
                         worldRep = emptyOutCellsHorizontal(
                                 worldRep, startCoords[1], startCoords[0], endCoords[0]
                         );
                     } else {
-                        // carve out L-shaped corridor.
-                        // System.out.println("Carving L-shaped corridor from "+i+" to "+ j);
+                        // carve out L-shaped corridor
                         // carve out row horizontally from start[0] to end[0] on the start row
                         worldRep = emptyOutCellsHorizontal(
                                 worldRep, startCoords[1], startCoords[0], endCoords[0]
                         );
+
                         // carve out column vertically from start[1] to end[1] on the end column
                         worldRep = emptyOutCellsVertical(
                                 worldRep, endCoords[0], startCoords[1], endCoords[1]
@@ -239,10 +245,10 @@ public class WorldGenerator {
      * a vertical line in the matrix to 1s.
      * Note that the input is in cartesian coordinates.
      *
-     * @param matrix
-     * @param X
-     * @param startY
-     * @param endY
+     * @param matrix the array to modify in-place.
+     * @param X      X (cartesian) coordinate of the vertical line.
+     * @param startY starting Y (cartesian) coordinate of the vertical line.
+     * @param endY   starting Y (cartesian) coordinate of the vertical line.
      */
     private int[][] emptyOutCellsVertical(int[][] matrix, int X, int startY, int endY) {
         int start;
@@ -254,9 +260,7 @@ public class WorldGenerator {
             start = endY;
             end = startY;
         }
-        int height = matrix.length;
         for (int i = start; i <= end; i++) {
-            // matrix[height-1-i][X] = 1;
             matrix[i][X] = 1;
         }
         return matrix;
@@ -268,10 +272,10 @@ public class WorldGenerator {
      * a horizontal line in the matrix to 1s.
      * Note that the input is in cartesian coordinates.
      *
-     * @param matrix
-     * @param Y
-     * @param startX
-     * @param endX
+     * @param matrix the array to modify in-place.
+     * @param Y      Y (cartesian) coordinate of the vertical line.
+     * @param startX starting X (cartesian) coordinate of the vertical line.
+     * @param endX   starting X (cartesian) coordinate of the vertical line.
      */
     private int[][] emptyOutCellsHorizontal(int[][] matrix, int Y, int startX, int endX) {
         int start;
@@ -284,8 +288,6 @@ public class WorldGenerator {
             end = startX;
         }
 
-        int height = matrix.length;
-
         for (int i = start; i <= end; i++) {
             // matrix[height-1-Y][i] = 1;
             matrix[Y][i] = 1;
@@ -297,8 +299,8 @@ public class WorldGenerator {
      * Helper method. Given a roomGraph, return an int array representation of just the rooms.
      * 0 represents a "wall" while 1 represents walkable space.
      *
-     * @param roomGraph
-     * @return
+     * @param roomGraph the representation of the rooms as a graph
+     * @return int[][]  representation of rooms as a 2D int array.
      */
     private int[][] emptyOutRooms(RoomGraph roomGraph) {
         // We represent the TETile matrix with an int matrix first.
@@ -325,7 +327,6 @@ public class WorldGenerator {
         return worldRep;
     }
 
-    //TODO: change below method back to private
     /**
      * Converts an int[][] representing a world into a TETile[][] to prepare for rendering.
      *

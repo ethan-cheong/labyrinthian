@@ -6,9 +6,10 @@ import static byow.Core.Direction.*;
 
 /**
  * Class representing a crawler.
- * Crawlers wander through the map randomly, until the player steps into their range, represented
- * as a Diamond around them.
- *
+ * Crawlers wander through the map randomly, until the player steps into their range, which
+ * aggravates them. Distance is measured using the taxicab metric.
+ * Once the player steps into their range, they calculate the shortest path to the player using
+ * Dijkstra's algorithm.
  */
 public class Crawler extends Enemy {
     Random _random;
@@ -27,8 +28,9 @@ public class Crawler extends Enemy {
 
     /**
      * Checks if a crawler's move is valid.
-     * @param world
-     * @return
+     * @param move the direction that is being checked.
+     * @param world the current representation of the Labyrinthian world.
+     * @return true iff the move is valid given the representation of the world.
      */
     private boolean isValidMove(Direction move, TETile[][] world){
         switch (move) {
@@ -151,7 +153,7 @@ public class Crawler extends Enemy {
     }
 
     /**
-     * Helper for updatePosition. Enemy uses Dijkstra's on its own x and y coordinates, and the
+     * Helper for updatePosition. Crawler uses Dijkstra's on its own x and y coordinates, and the
      * x and y coordinates of the player (dest_x, dest_y). Its own x and y should not be modified.
      * BFS uses matrix coordinates internally.
      * @param dest_x
@@ -275,8 +277,6 @@ public class Crawler extends Enemy {
             }
             visited[current_x][current_y] = true;
         }
-        // Testing:
-        // PriorityCoordinate.printArray(prevTile);
 
         int pointerX = dest_x;
         int pointerY = dest_y;
@@ -310,7 +310,7 @@ public class Crawler extends Enemy {
     }
 
     /**
-     * Helper for bfs. It checks whether we should consider the tile for bfs.
+     * Helper for Dijkstra's. It checks whether we should consider the tile for Dijkstra's.
      * @param row     indexes the row
      * @param col     indexes the column
      * @return        true iff the tile hasn't already been visited.

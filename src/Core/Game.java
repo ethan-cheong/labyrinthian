@@ -10,18 +10,24 @@ import java.util.Random;
 import static byow.TileEngine.Tileset.*;
 
 /**
- *  Class that describes the state of a Game.
+ *  Class that describes the current state of a Labyrinthian game.
  */
 public class Game implements Serializable {
 
-    Player _player;                      /* player character */
-    TETile[][] _world;              /* world with paths filled in*/
-    TETile[][] _worldNoPaths;       /* clean copy of the world; passed to enemies */
-    boolean _dark;                  /* indicates whether the lights are on or off */
-    ArrayList<Enemy> _enemies = new ArrayList<>();      /* enemies */
-    ArrayList<Item> _items;         /* items */
-    boolean _running;               /* is the game not over */
-    int _ticks;                     /* How many turns have passed */
+    /* player character */
+    Player _player;
+    /* world with paths filled in*/
+    TETile[][] _world;
+    /* we maintain a clean copy of the world; passed to enemies for pathfinding purposes. */
+    TETile[][] _worldNoPaths;
+    /* indicates whether the lights are on or off */
+    boolean _dark;
+    ArrayList<Enemy> _enemies = new ArrayList<>();
+    ArrayList<Item> _items;
+
+    /* return true iff the game is still running */
+    boolean _running;
+    int _ticks;
     Difficulty _difficulty;
 
     int _exitX;
@@ -29,7 +35,6 @@ public class Game implements Serializable {
 
     Random _random;
 
-    // TODO: define default Crawler parameters for instantiation
 
     public Game(TETile[][] world, Random random, Difficulty difficulty) {
         _world = world;
@@ -55,14 +60,13 @@ public class Game implements Serializable {
                     _exitY = j;
                     System.out.println(_exitX + ", " + _exitY);
                 }
-                //TODO: parse other enemies and items.
             }
         }
         _running = true;
     }
 
     /**
-     * Returns true if the game is still running.
+     * Returns true iff the game is still running.
      * @return true iff the game is still running.
      */
     public boolean isRunning() {
@@ -75,44 +79,29 @@ public class Game implements Serializable {
      * Returns the outcome of the turn.
      */
     public Outcome tickTime(char move) {
-
-
         if (!_player.checkValidMove(move, _world)) {
             return Outcome.NOT_VALID_MOVE;
         }
-
-
         // erase all paths from the world
         _world = TETile.copyOf(_worldNoPaths);
 
         updatePlayerPosition(move);
         _player.decrementDread();
-        // for each active enemy:
-        //  update their aggro state
-        //  update their positions depending on if they're aggro or just moving around.
-        //  idea: they handle their own movement in the class, pass a movement signal
-        //  to the Game, game uses it to update it's own TETile array?
-
         updateEnemyPositions();
-        // Update all enemies in enemies.
-        // Update items.
-        // Update world based on new positions of player, characters, items.
-        // Update gamestate if no longer running
         _ticks ++;
-
         // check if the player has won the game
         System.out.println(_player.getX() + ", " + _player.getY());
         if (_player.getX() == _exitX && _player.getY() == _exitY) {
             _running = false;
             return Outcome.WON_GAME;
         }
-
         // check if the player is still alive
         if (_player.getDread() <= 0) {
             _running = false;
             return Outcome.DREAD;
         }
 
+        // update position of enemies
         for (Enemy e: _enemies) {
             if (e.nextTo(_player)) {
                 _player.makeNotAlive();
@@ -120,9 +109,6 @@ public class Game implements Serializable {
                 return Outcome.KILLED_BY_CRAWLER;
             }
         }
-
-
-
         return Outcome.MOVE;
     }
 
@@ -150,7 +136,6 @@ public class Game implements Serializable {
                 newX++;
                 break;
         }
-        // make this floor for now.
         _world[x][y] = _world[newX][newY].copyOfNotPath();
         _worldNoPaths[x][y] = _worldNoPaths[newX][newY].copyOfNotPath();
         _world[newX][newY] = AVATAR;
@@ -171,7 +156,6 @@ public class Game implements Serializable {
                 enemyTile = enemyTile.copyOfDarkFlipped();
             }
 
-            //_world = e.getPath();
             int x = e.getX();
             int y = e.getY();
             int newX = x;
@@ -204,7 +188,6 @@ public class Game implements Serializable {
             _worldNoPaths[newX][newY] = enemyTile;
         }
     }
-    // TODO: modify world directly, so we don't have to copy it
     /**
      * Given an enemy e, fill in the world with its path.
      * @param e

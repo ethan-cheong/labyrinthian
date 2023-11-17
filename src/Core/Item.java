@@ -2,5 +2,6 @@ package byow.Core;
 
 import java.io.Serializable;
 
-public class Item implements Serializable {
+public abstract class Item implements Serializable {
+    // We haven't implemented this feature
 }

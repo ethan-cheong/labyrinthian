@@ -22,12 +22,10 @@ public class Player implements Serializable {
     private HashMap<Integer, Item> inventory;
 
     /* darkness mechanic */
-    // TODO
     private int _dread;
     private int _dreadDecay;
 
     /* the currently equipped Item */
-    // TODO
     private Item equipped;
 
     private boolean _alive;

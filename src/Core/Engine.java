@@ -21,7 +21,7 @@ public class Engine {
     public static final File SAVE_FILE = new File(System.getProperty("user.dir"), "save.txt");
 
     private static final String[] randomDialogue = {"It's so dark!", "What's that noise?",
-            "I'm tired.", "Wasn't I just here?", "I need a lamp...", "hm", "..."}; //TODO: maybe delete if you dont want this
+            "I'm tired.", "Wasn't I just here?", "I need a lamp...", "hm", "..."};
 
     /* Indicates whether the engine will render paths taken by enemies. */
     private boolean renderPaths = false;
@@ -110,7 +110,6 @@ public class Engine {
         }
         Outcome outcome = null;
         while (game.isRunning()) {
-//             if mouse pressed:
              int mouseX = (int) StdDraw.mouseX();
              int mouseY = (int) StdDraw.mouseY();
              if ((mouseX <= WIDTH && mouseY <= HEIGHT) && mouseY >= 2) {
@@ -130,7 +129,6 @@ public class Engine {
                  StdDraw.show();
              }
 
-            //
             StdDraw.setPenColor(Color.WHITE);
             Font f = new Font("Narnia", Font.BOLD, 12);
             StdDraw.setFont(f);
@@ -139,8 +137,6 @@ public class Engine {
             String save = "CURRENT DREAD: " + game._player.getDread();
             StdDraw.text(WIDTH/1.15, 1, save);
             StdDraw.show();
-            //
-
 
             char input = gatherUserInput(new char[] {':', 'w', 'a', 's', 'd'});
             if (input==':') {
@@ -251,7 +247,6 @@ public class Engine {
      * Displays controls and instructions about the game.
      */
     private void helpScreen() {
-        // TODO: delete this later
         ter.initialize(WIDTH, HEIGHT);
         StdDraw.clear(Color.BLACK);
         StdDraw.setPenColor(Color.WHITE);
@@ -287,7 +282,6 @@ public class Engine {
      * Displays controls and instructions about the game.
      */
     public void gameOverScreen(Outcome outcome) {
-        // TODO: delete this later
         ter.initialize(WIDTH, HEIGHT);
         StdDraw.clear(Color.BLACK);
         StdDraw.setPenColor(outcome.MESSAGE_COLOR);
@@ -297,9 +291,7 @@ public class Engine {
         StdDraw.text((double) WIDTH / 2, (double) HEIGHT / 3 * 2 , outcome.MESSAGE);
         StdDraw.setFont(fontSmall);
         StdDraw.text((double) WIDTH / 2, (double) HEIGHT / 3, "Press q to quit.");
-
         StdDraw.show();
-        char input = gatherUserInput(new char[] {'q', 'Q'});
     }
 
     /**
@@ -320,15 +312,12 @@ public class Engine {
      *
      */
     private void saveGame(Game game) {
-
-//        String gameID = sha1(game); only a single save supported
         Utils.writeObject(SAVE_FILE, game);
     }
 
     /**
-     * Loads the game from the ./saves directory. Should throw an exception if a file doesn't
-     * exist?
-     * @return
+     * Loads the game from the ./saves directory.
+     * @return null if no save files exist; otherwise, returns the current save file.
      */
     private Game loadGame() {
         if (!SAVE_FILE.exists()) {
@@ -339,15 +328,6 @@ public class Engine {
     }
 
     /**
-     * Load the story/lore when "S" is pressed in the menu.
-     */
-    public void loadStoryLore() {
-        // TODO: load lore screen
-    }
-
-    //use std mouse to track what tile we're at when we hover over a tile
-
-    /**
      * Returns a single char consisting of the user's next input, provided it's in validChars.
      * Wait until a character in validChars is entered.
      */
@@ -356,17 +336,17 @@ public class Engine {
         for (char c : validChars) {
             valid.add(c);
         }
-        //waiting for any keypress...
+        // waiting for any keypress...
         while (!StdDraw.hasNextKeyTyped()) {
-            StdDraw.pause(1); //we'll keep waiting until any key is pressed
+            StdDraw.pause(1); // keep waiting until any key is pressed
         }
 
-        //we want only one keypress for this method
+        // only one keypress for this method
         while (true) {
             char typedCharacter = StdDraw.nextKeyTyped();
             if (valid.contains(typedCharacter)) {
                 return typedCharacter;
-            } else { //keep waiting for the next key since we did not get any above keys^^
+            } else {
                 while(!StdDraw.hasNextKeyTyped()) {
                     StdDraw.pause(1);
                 }

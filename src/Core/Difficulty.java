@@ -1,5 +1,10 @@
 package byow.Core;
 
+/**
+ * The Difficulty enum contains hard-coded parameters for game difficulty.
+ * It is used by the Engine to determine various aspects of world generation, such as
+ * the number of enemies and their parameters.
+ */
 public enum Difficulty {
 
     EASY (7, 2, 10000, 1, 10, 1),

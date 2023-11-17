@@ -2,6 +2,10 @@ package byow.Core;
 
 import java.awt.*;
 
+/**
+ * The outcome enum represents several possible outcomes of the game, as well as the messages
+ * displayed.
+ */
 public enum Outcome {
     KILLED_BY_CRAWLER (Color.red, "You were killed by a crawler..."),
     DREAD (Color.blue, "You gave up on escaping..."),
