@@ -29,3 +29,18 @@ The red tiles represent enemies. When the player steps into the range of enemies
 ### Help menu
 Press ':h' to show a help menu.
 ![help menu](./images/help.png)
+
+## Code
+The source code for Labyrinthian can be found in src/Core. Saves are stored in src/saves, and the Tile Rendering engine that was provided to us is included in src/TileEngine. src/Core contains the following noteworthy files:
+- Engine.java
+    - Handles player input and visualizes the game screens.
+- Game.java
+    - Keeps track of logical information about the game (e.g. states of all enemies, the current world)
+- WorldGenerator.java
+    - Pseudo-randomly generates a 2D world for use in Game, using RandomUtils.java, Room.java and RoomGraph.java
+- Player.java
+    - Stores information about the player character
+- Enemy.java
+    - Abstract class of enemies in the game. Enemies react to the player and change their behaviour depending on the player's actions.
+- Crawler.java
+    - The main enemy implemented in Labyrinthian; extends the Enemy ADT.
